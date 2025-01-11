@@ -5,6 +5,7 @@ on:
   pull_requests:
     branches:
       - develop
+      - main
 
 # Jobs to run
 jobs:
@@ -23,8 +24,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Build
-        run: npm run build
-
-      - name: Run Tests
-        run: npm run test
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm start
