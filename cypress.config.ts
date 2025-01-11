@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import coverageTask from "@cypress/code-coverage/task";
 import viteConfig from './vite.config';
 
 export default defineConfig({
@@ -16,6 +17,9 @@ export default defineConfig({
     baseUrl: 'http://localhost:3001',
     setupNodeEvents(on, config) {
       // implement node event listeners here
+      coverageTask(on, config);
+
+			return config;
     },
   },
 });
