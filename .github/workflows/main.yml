@@ -49,15 +49,6 @@ jobs:
             echo "No process running on port 3001"
           fi
 
-      # - name: Start server
-      #   run: npm start
-      #   env:
-      #     PORT: 3001
-      #     MONGO_URI: mongodb://localhost:27017/testdb
-
-      # - name: Wait for server to be ready
-      #   run: npx wait-on http://localhost:3001 --timeout 300000
-
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
@@ -65,4 +56,10 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3001'
           wait-on-timeout: 300
+          browser: electron
+
+      - name: Run Cypress Component Tests
+        uses: cypress-io/github-action@v6
+        with:
+          testing-type: component
           browser: electron
