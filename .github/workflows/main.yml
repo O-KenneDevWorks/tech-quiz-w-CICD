@@ -40,9 +40,14 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Kill existing processes on port 3001
+      - name: Ensure no processes are running on port 3001
         run: |
-          lsof -t -i:3001 | xargs -r kill -9
+          if lsof -i:3001; then
+            echo "Killing process on port 3001"
+            lsof -t -i:3001 | xargs -r kill -9
+          else
+            echo "No process running on port 3001"
+          fi
 
       - name: Start server
         run: npm start
@@ -61,5 +66,3 @@ jobs:
           wait-on: 'http://localhost:3001'
           wait-on-timeout: 300
           browser: electron
-          env:
-            CYPRESS_DEBUG: true
