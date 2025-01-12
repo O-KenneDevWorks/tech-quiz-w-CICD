@@ -1,42 +1,65 @@
 name: Test Workflow
 
-# Trigger the workflow on push and pull requests
 on:
   push:
-    branches: 
+    branches:
       - main
       - develop
   pull_request:
-    branches: 
+    branches:
       - main
       - develop
 
-# Jobs to run
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js environment
-      - name: Use Node.js 21.x
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 21.x
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Step 4: Build and start the application, then run Cypress tests
-      - name: Cypress run
+      - name: Build app
+        run: npm run build
+
+      - name: Ensure no processes are running on port 3001
+        run: |
+          if lsof -i:3001; then
+            echo "Killing process on port 3001"
+            lsof -t -i:3001 | xargs -r kill -9
+          else
+            echo "No process running on port 3001"
+          fi
+
+      - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           build: npm run build
           start: npm start
           wait-on: 'http://localhost:3001'
-          wait-on-timeout: 120
+          wait-on-timeout: 300
           browser: electron
+
+      - name: Run Cypress Component Tests
+        uses: cypress-io/github-action@v6
+        with:
+          component: true
+
